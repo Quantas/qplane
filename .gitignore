@@ -2,7 +2,6 @@
 *.ipr
 *.iws
 bin/
-gen/
 target/
 .idea/
 *.log
