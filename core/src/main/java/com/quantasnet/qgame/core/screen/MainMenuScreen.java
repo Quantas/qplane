@@ -14,7 +14,7 @@ public class MainMenuScreen implements Screen {
 	public MainMenuScreen(final QGame gam) {
 		game = gam;
 		camera = new OrthographicCamera();
-		camera.setToOrtho(false, 800, 480);
+		camera.setToOrtho(false, QGame.WIDTH, QGame.HEIGHT);
 	}
 
 	@Override

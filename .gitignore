@@ -13,3 +13,4 @@ activemq-data/
 .settings/
 .springBeans
 Thumbs.db
+.gwt-log

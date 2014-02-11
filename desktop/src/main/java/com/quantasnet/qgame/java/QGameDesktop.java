@@ -10,8 +10,8 @@ public class QGameDesktop {
 		LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
 		config.useGL20 = true;
 		config.title = "QGame";
-		config.width = 800;
-		config.height = 480;
+		config.width = (int) QGame.WIDTH;
+		config.height = (int) QGame.HEIGHT;
 		new LwjglApplication(new QGame(), config);
 	}
 }
