@@ -10,25 +10,28 @@ import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.GL10;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.Pool;
 import com.badlogic.gdx.utils.TimeUtils;
 import com.quantasnet.qgame.core.QGame;
+import com.quantasnet.qgame.core.objects.Raindrop;
 
 public class GameScreen implements Screen {
-	final QGame game;
+	private final QGame game;
 
-	Texture dropImage;
-	Texture bucketImage;
-	Sound dropSound;
-	Music rainMusic;
-	OrthographicCamera camera;
-	Rectangle bucket;
-	Array<Rectangle> raindrops;
-	long lastDropTime;
-	int dropsGathered;
+	private final Texture dropImage;
+	private final Texture bucketImage;
+	private final Sound dropSound;
+	private final Music rainMusic;
+	private final OrthographicCamera camera;
+	private final Rectangle bucket;
+	private final Array<Raindrop> raindrops;
+	private final Pool<Raindrop> dropPool;
+	
+	private long lastDropTime;
+	private int dropsGathered;
 
 	public GameScreen(final QGame gam) {
 		this.game = gam;
@@ -55,17 +58,19 @@ public class GameScreen implements Screen {
 		bucket.height = 64;
 
 		// create the raindrops array and spawn the first raindrop
-		raindrops = new Array<Rectangle>();
+		raindrops = new Array<Raindrop>();
+		dropPool = new Pool<Raindrop>(10, 15) {
+			@Override
+			protected Raindrop newObject() {
+				return new Raindrop();
+			}
+		};
+		
 		spawnRaindrop();
 	}
 
 	private void spawnRaindrop() {
-		Rectangle raindrop = new Rectangle();
-		raindrop.x = MathUtils.random(0, QGame.WIDTH - 64);
-		raindrop.y = QGame.HEIGHT;
-		raindrop.width = 64;
-		raindrop.height = 64;
-		raindrops.add(raindrop);
+		raindrops.add(dropPool.obtain());
 		lastDropTime = TimeUtils.nanoTime();
 	}
 
@@ -90,46 +95,54 @@ public class GameScreen implements Screen {
 		game.batch.begin();
 		game.font.draw(game.batch, "Drops Collected: " + dropsGathered, 0, QGame.HEIGHT);
 		game.batch.draw(bucketImage, bucket.x, bucket.y);
-		for (Rectangle raindrop : raindrops) {
+		for (final Raindrop raindrop : raindrops) {
 			game.batch.draw(dropImage, raindrop.x, raindrop.y);
 		}
 		game.batch.end();
 
 		// process user input
 		if (Gdx.input.isTouched()) {
-			Vector3 touchPos = new Vector3();
+			final Vector3 touchPos = new Vector3();
 			touchPos.set(Gdx.input.getX(), Gdx.input.getY(), 0);
 			camera.unproject(touchPos);
 			bucket.x = touchPos.x - 64 / 2;
 		}
-		if (Gdx.input.isKeyPressed(Keys.LEFT))
+		if (Gdx.input.isKeyPressed(Keys.LEFT)) {
 			bucket.x -= 200 * Gdx.graphics.getDeltaTime();
-		if (Gdx.input.isKeyPressed(Keys.RIGHT))
+		}
+		if (Gdx.input.isKeyPressed(Keys.RIGHT)) {
 			bucket.x += 200 * Gdx.graphics.getDeltaTime();
+		}
 
 		// make sure the bucket stays within the screen bounds
-		if (bucket.x < 0)
+		if (bucket.x < 0) {
 			bucket.x = 0;
-		if (bucket.x > QGame.WIDTH - 64)
+		}
+		if (bucket.x > QGame.WIDTH - 64) {
 			bucket.x = QGame.WIDTH - 64;
+		}
 
 		// check if we need to create a new raindrop
-		if (TimeUtils.nanoTime() - lastDropTime > 1000000000)
+		if (TimeUtils.nanoTime() - lastDropTime > 1000000000) {
 			spawnRaindrop();
+		}
 
 		// move the raindrops, remove any that are beneath the bottom edge of
 		// the screen or that hit the bucket. In the later case we increase the
 		// value our drops counter and add a sound effect.
-		Iterator<Rectangle> iter = raindrops.iterator();
+		final Iterator<Raindrop> iter = raindrops.iterator();
 		while (iter.hasNext()) {
-			Rectangle raindrop = iter.next();
+			final Raindrop raindrop = iter.next();
 			raindrop.y -= 200 * Gdx.graphics.getDeltaTime();
-			if (raindrop.y + 64 < 0)
+			if (raindrop.y + 64 < 0) {
 				iter.remove();
+				dropPool.free(raindrop);
+			}
 			if (raindrop.overlaps(bucket)) {
 				dropsGathered++;
 				dropSound.play();
 				iter.remove();
+				dropPool.free(raindrop);
 			}
 		}
 	}
@@ -163,5 +176,6 @@ public class GameScreen implements Screen {
 		bucketImage.dispose();
 		dropSound.dispose();
 		rainMusic.dispose();
+		dropPool.clear();
 	}
 }
