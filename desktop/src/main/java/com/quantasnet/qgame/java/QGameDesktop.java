@@ -12,6 +12,7 @@ public class QGameDesktop {
 		config.title = "QGame";
 		config.width = (int) QGame.WIDTH;
 		config.height = (int) QGame.HEIGHT;
+		config.vSyncEnabled = true;
 		new LwjglApplication(new QGame(), config);
 	}
 }

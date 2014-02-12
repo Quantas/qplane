@@ -4,12 +4,13 @@ import java.util.Iterator;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
-import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.GL10;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.Texture.TextureWrap;
+import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
@@ -18,11 +19,11 @@ import com.badlogic.gdx.utils.TimeUtils;
 import com.quantasnet.qgame.core.QGame;
 import com.quantasnet.qgame.core.objects.Raindrop;
 
-public class GameScreen implements Screen {
-	private final QGame game;
-
+public class GameScreen extends QScreenAdapter {
 	private final Texture dropImage;
 	private final Texture bucketImage;
+	private Texture background;
+	private Sprite backgroundSprite;
 	private final Sound dropSound;
 	private final Music rainMusic;
 	private final OrthographicCamera camera;
@@ -32,10 +33,16 @@ public class GameScreen implements Screen {
 	
 	private long lastDropTime;
 	private int dropsGathered;
+	private float scrollTimer = 0.0f;
 
-	public GameScreen(final QGame gam) {
-		this.game = gam;
+	public GameScreen(final QGame game) {
+		super(game);
 
+		background = new Texture(Gdx.files.internal("background.png"));
+		background.setWrap(TextureWrap.Repeat, TextureWrap.Repeat);
+		backgroundSprite = new Sprite(background, 0, 0, (int) QGame.WIDTH, (int) QGame.HEIGHT);
+		backgroundSprite.setSize(QGame.WIDTH * 3, QGame.HEIGHT);
+		
 		// load the images for the droplet and the bucket, 64x64 pixels each
 		dropImage = new Texture(Gdx.files.internal("droplet.png"));
 		bucketImage = new Texture(Gdx.files.internal("bucket.png"));
@@ -76,23 +83,26 @@ public class GameScreen implements Screen {
 
 	@Override
 	public void render(float delta) {
-		// clear the screen with a dark blue color. The
-		// arguments to glClearColor are the red, green
-		// blue and alpha component in the range [0,1]
-		// of the color to be used to clear the screen.
-		Gdx.gl.glClearColor(0, 0, 0.2f, 1);
+		scrollTimer += delta;
+		float time = scrollTimer / 8;
+		if (time > 1.0f)
+			scrollTimer = 0.0f;
+		
+		Gdx.gl.glClearColor(0, 0, 0, 1);
 		Gdx.gl.glClear(GL10.GL_COLOR_BUFFER_BIT);
 
 		// tell the camera to update its matrices.
 		camera.update();
 
-		// tell the SpriteBatch to render in the
-		// coordinate system specified by the camera.
 		game.batch.setProjectionMatrix(camera.combined);
 
+		backgroundSprite.setU(time);
+		backgroundSprite.setU2(time + 1);
+		
 		// begin a new batch and draw the bucket and
 		// all drops
 		game.batch.begin();
+		backgroundSprite.draw(game.batch);
 		game.font.draw(game.batch, "Drops Collected: " + dropsGathered, 0, QGame.HEIGHT);
 		game.batch.draw(bucketImage, bucket.x, bucket.y);
 		for (final Raindrop raindrop : raindrops) {
@@ -145,10 +155,8 @@ public class GameScreen implements Screen {
 				dropPool.free(raindrop);
 			}
 		}
-	}
-
-	@Override
-	public void resize(int width, int height) {
+		
+		game.fpsLog.log();
 	}
 
 	@Override
@@ -156,18 +164,6 @@ public class GameScreen implements Screen {
 		// start the playback of the background music
 		// when the screen is shown
 		rainMusic.play();
-	}
-
-	@Override
-	public void hide() {
-	}
-
-	@Override
-	public void pause() {
-	}
-
-	@Override
-	public void resume() {
 	}
 
 	@Override
