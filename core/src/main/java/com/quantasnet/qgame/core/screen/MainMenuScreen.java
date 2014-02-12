@@ -46,8 +46,8 @@ public class MainMenuScreen extends QScreenAdapter {
 		
 		game.batch.begin();
 		backgroundSprite.draw(game.batch);
-		game.font.draw(game.batch, "QGame", Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() / 2);
-		game.font.draw(game.batch, "Touch to Start", Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() / 2 - 50);
+		game.font.draw(game.batch, "QGame", QGame.WIDTH / 2, QGame.HEIGHT / 2);
+		game.font.draw(game.batch, "Touch to Start", QGame.WIDTH / 2, QGame.HEIGHT / 2 - 50);
 		game.batch.end();
 
 		if (Gdx.input.isTouched()) {
