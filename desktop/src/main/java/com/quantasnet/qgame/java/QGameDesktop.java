@@ -8,11 +8,11 @@ import com.quantasnet.qgame.core.QGame;
 public class QGameDesktop {
 	public static void main(String[] args) {
 		LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
-		config.useGL20 = true;
+//		config.useGL20 = true;
 		config.title = "QGame";
 		config.width = (int) QGame.WIDTH;
 		config.height = (int) QGame.HEIGHT;
-		config.vSyncEnabled = true;
+//		config.vSyncEnabled = true;
 		new LwjglApplication(new QGame(), config);
 	}
 }

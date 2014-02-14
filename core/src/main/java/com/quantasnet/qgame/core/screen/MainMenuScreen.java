@@ -18,18 +18,17 @@ public class MainMenuScreen extends QScreenAdapter {
 	public MainMenuScreen(final QGame game) {
 		super(game);
 		camera = new OrthographicCamera();
-		camera.setToOrtho(false, QGame.WIDTH, QGame.HEIGHT);
 		
-		background = new Texture(Gdx.files.internal("background.png"));
+		background = new Texture(Gdx.files.internal("background2.png"));
 		background.setWrap(TextureWrap.Repeat, TextureWrap.Repeat);
 		backgroundSprite = new Sprite(background, 0, 0, (int) QGame.WIDTH, (int) QGame.HEIGHT);
-		backgroundSprite.setSize(QGame.WIDTH * 3, QGame.HEIGHT);
+		backgroundSprite.setSize(QGame.WIDTH * 8, QGame.HEIGHT);
 	}
 
 	@Override
 	public void render(float delta) {
 		scrollTimer += delta;
-		float time = scrollTimer / 8;
+		float time = scrollTimer / 16;
 		if (time > 1.0f)
 			scrollTimer = 0.0f;
 
@@ -37,7 +36,7 @@ public class MainMenuScreen extends QScreenAdapter {
 		Gdx.gl.glClear(GL10.GL_COLOR_BUFFER_BIT);
 
 		camera.update();
-		game.batch.setProjectionMatrix(camera.combined);
+		//game.batch.setProjectionMatrix(camera.combined);
 
 		backgroundSprite.setU(time);
 		backgroundSprite.setU2(time + 1);
@@ -55,5 +54,10 @@ public class MainMenuScreen extends QScreenAdapter {
 			dispose();
 		}
 		game.fpsLog.log();
+	}
+	
+	@Override
+	public void dispose() {
+		background.dispose();
 	}
 }
