@@ -15,6 +15,7 @@ public class Pipes implements Poolable {
 	private final Rectangle top = new Rectangle();
 	private final Rectangle bottom = new Rectangle();
 	private final Texture texture;
+	private boolean scored = false;
 	
 	public Pipes(final Texture texture) {
 		this.texture = texture;
@@ -35,8 +36,18 @@ public class Pipes implements Poolable {
 		return top.x + WIDTH < 0;
 	}
 	
-	public boolean hitPlane(final Rectangle plane) {
-		return top.overlaps(plane) || bottom.overlaps(plane);
+	public boolean hitPlane(final Plane plane) {
+		return top.overlaps(plane.getHitBox()) || bottom.overlaps(plane.getHitBox());
+	}
+	
+	public boolean scored(final Plane plane) {
+		if (!scored) {
+			if (top.x < plane.getHitBox().x) {
+				scored = true;
+				return true;
+			}
+		}
+		return false;
 	}
 	
 	@Override
@@ -55,5 +66,7 @@ public class Pipes implements Poolable {
 		bottom.width = WIDTH;
 		bottom.y = 0;
 		bottom.x = QGame.WIDTH + WIDTH;
+		
+		scored = false;
 	}
 }

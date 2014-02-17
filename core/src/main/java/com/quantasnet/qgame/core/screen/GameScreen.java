@@ -5,18 +5,22 @@ import java.util.Iterator;
 import java.util.List;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL10;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.Texture.TextureWrap;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.Sprite;
-import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Pool;
 import com.badlogic.gdx.utils.TimeUtils;
 import com.quantasnet.qgame.core.QGame;
 import com.quantasnet.qgame.core.objects.Pipes;
+import com.quantasnet.qgame.core.objects.Plane;
 
 public class GameScreen extends QScreenAdapter {
+	
+	private static final long PIPE_TIME = 2000000000L;
 	
 	private final Texture planeImage;
 	private final Texture pipeImage;
@@ -25,19 +29,18 @@ public class GameScreen extends QScreenAdapter {
 	private Texture background;
 	private Sprite backgroundSprite;
 	private final OrthographicCamera camera;
-	private final Rectangle plane;
-	
-	private float velocity = 200;
+	private final Plane plane;
+	private final BitmapFont font;
 	
 	private float scrollTimer = 0.0f;
-	
-	private final long pipeTimer = 2000000000L;
-	
 	private long lastPipeTime = TimeUtils.nanoTime();
-
+	private int score = 0;
+	
 	public GameScreen(final QGame game) {
 		super(game);
-
+		
+		font = new BitmapFont();
+		
 		background = new Texture(Gdx.files.internal("background2.png"));
 		background.setWrap(TextureWrap.Repeat, TextureWrap.Repeat);
 		backgroundSprite = new Sprite(background, 0, 0, (int)QGame.WIDTH, (int)QGame.HEIGHT);
@@ -57,12 +60,8 @@ public class GameScreen extends QScreenAdapter {
 		
 		camera = new OrthographicCamera();
 		camera.setToOrtho(false, QGame.WIDTH, QGame.HEIGHT);
-
-		plane = new Rectangle();
-		plane.height = 64;
-		plane.width = 64;
-		plane.x = 100;
-		plane.y = QGame.HEIGHT / 2 - plane.height / 2;
+		
+		plane = new Plane(planeImage);
 	}
 
 	@Override
@@ -82,21 +81,20 @@ public class GameScreen extends QScreenAdapter {
 		backgroundSprite.setU(time);
 		backgroundSprite.setU2(time + 1);
 		
-		plane.y += velocity * delta;
-		velocity -= 250 * delta;
-		if (Gdx.input.justTouched()) {
-			velocity = 200;
-		}
+		plane.move(delta);
 		
 		game.batch.begin();
 		backgroundSprite.draw(game.batch);
-		game.batch.draw(planeImage, plane.x, plane.y);
+		plane.render(game.batch);
 		for (final Pipes  pipes : currentPipes) {
 			pipes.render(game.batch);
 		}
+		font.setColor(Color.BLACK);
+		font.setScale(2f,2f);
+		font.draw(game.batch, Integer.toString(score), (QGame.WIDTH / 2) - 20, QGame.HEIGHT - 20);
 		game.batch.end();
 
-		if (TimeUtils.nanoTime() - lastPipeTime > pipeTimer) {
+		if (TimeUtils.nanoTime() - lastPipeTime > PIPE_TIME) {
 			currentPipes.add(pipes.obtain());
 			lastPipeTime = TimeUtils.nanoTime();
 		}
@@ -110,11 +108,13 @@ public class GameScreen extends QScreenAdapter {
 				pipes.free(pipe);
 			}
 			if (pipe.hitPlane(plane)) {
+				// game over
 				game.setScreen(new MainMenuScreen(game));
 			}
+			if (pipe.scored(plane)) {
+				score++;
+			}
 		}
-		
-		game.fpsLog.log();
 	}
 
 	@Override

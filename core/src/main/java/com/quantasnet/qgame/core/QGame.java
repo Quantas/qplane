@@ -10,8 +10,6 @@ import com.quantasnet.qgame.core.screen.SplashScreen;
 public class QGame extends Game {
 	public static final float WIDTH = 480;
 	public static final float HEIGHT = 800;
-	//public static final float WIDTH = 512;
-	//public static final float HEIGHT = 1024;
 	
 	public SpriteBatch batch;
     public BitmapFont font;
