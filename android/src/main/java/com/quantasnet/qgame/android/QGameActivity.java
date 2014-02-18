@@ -13,7 +13,6 @@ public class QGameActivity extends AndroidApplication {
 		super.onCreate(savedInstanceState);
 		
 		final AndroidApplicationConfiguration config = new AndroidApplicationConfiguration();
-		//config.useGL20 = true;
 		config.useAccelerometer = false;
 		config.useCompass = false;
 		initialize(new QGame(), config);

@@ -1,10 +1,10 @@
 package com.quantasnet.qgame.core.objects;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Pool.Poolable;
-import com.quantasnet.qgame.core.QGame;
 
 public class Pipes implements Poolable {
 
@@ -54,18 +54,18 @@ public class Pipes implements Poolable {
 	public void reset() {
 		// calculate height
 		final float height = (float) (Math.random() * 400) + 100;
-		final float height2 = QGame.HEIGHT - HOLE - height;
+		final float height2 = Gdx.graphics.getHeight() - HOLE - height;
 		
 		bottom.height = height;
 		top.height = height2;
 		
 		top.width = WIDTH;
-		top.y = QGame.HEIGHT - top.height;
-		top.x = QGame.WIDTH + WIDTH;
+		top.y = Gdx.graphics.getHeight() - top.height;
+		top.x = Gdx.graphics.getWidth() + WIDTH;
 
 		bottom.width = WIDTH;
 		bottom.y = 0;
-		bottom.x = QGame.WIDTH + WIDTH;
+		bottom.x = Gdx.graphics.getWidth() + WIDTH;
 		
 		scored = false;
 	}

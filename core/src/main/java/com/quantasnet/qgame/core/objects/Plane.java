@@ -5,10 +5,7 @@ import java.io.Serializable;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.math.Rectangle;
-import com.quantasnet.qgame.core.QGame;
 
 public class Plane implements Serializable {
 
@@ -18,7 +15,6 @@ public class Plane implements Serializable {
 
 	private final Rectangle textureBox = new Rectangle();
 	private final Rectangle hitBox = new Rectangle();
-	private final ShapeRenderer shapeRenderer = new ShapeRenderer();
 	private final Texture texture;
 
 	private float velocity = 200;
@@ -28,7 +24,7 @@ public class Plane implements Serializable {
 		textureBox.height = 64;
 		textureBox.width = 64;
 		textureBox.x = 100;
-		textureBox.y = QGame.HEIGHT / 2 - textureBox.height / 2;
+		textureBox.y = Gdx.graphics.getHeight() / 2 - textureBox.height / 2;
 
 		hitBox.height = 15;
 		hitBox.width = 55;
@@ -38,6 +34,10 @@ public class Plane implements Serializable {
 
 	public Rectangle getHitBox() {
 		return hitBox;
+	}
+	
+	public boolean hitBottom() {
+		return hitBox.y < 0;
 	}
 
 	public void move(final float delta) {
@@ -49,17 +49,11 @@ public class Plane implements Serializable {
 		velocity -= GRAVITY * delta;
 
 		if (Gdx.input.justTouched()) {
-			velocity = 200;
+			velocity = 300;
 		}
 	}
 
 	public void render(final SpriteBatch spriteBatch) {
 		spriteBatch.draw(texture, textureBox.x, textureBox.y);
-		shapeRenderer.begin(ShapeType.Line);
-		shapeRenderer.setColor(1, 0, 0, 1);
-		shapeRenderer.rect(hitBox.x, hitBox.y, hitBox.width, hitBox.height);
-		//shapeRenderer.setColor(0, 0, 1, 1);
-		//shapeRenderer.rect(textureBox.x, textureBox.y, textureBox.width, textureBox.height);
-		shapeRenderer.end();
 	}
 }

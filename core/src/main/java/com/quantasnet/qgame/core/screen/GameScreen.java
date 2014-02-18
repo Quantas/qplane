@@ -6,8 +6,6 @@ import java.util.List;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.GL10;
-import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.Texture.TextureWrap;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
@@ -28,7 +26,6 @@ public class GameScreen extends QScreenAdapter {
 	private final Pool<Pipes> pipes;
 	private Texture background;
 	private Sprite backgroundSprite;
-	private final OrthographicCamera camera;
 	private final Plane plane;
 	private final BitmapFont font;
 	
@@ -44,12 +41,12 @@ public class GameScreen extends QScreenAdapter {
 		background = new Texture(Gdx.files.internal("background2.png"));
 		background.setWrap(TextureWrap.Repeat, TextureWrap.Repeat);
 		backgroundSprite = new Sprite(background, 0, 0, (int)QGame.WIDTH, (int)QGame.HEIGHT);
-		backgroundSprite.setSize(QGame.WIDTH * 8, QGame.HEIGHT);
+		backgroundSprite.setSize(Gdx.graphics.getWidth() * 8, Gdx.graphics.getHeight());
 		
 		planeImage = new Texture(Gdx.files.internal("plane.png"));
 		pipeImage = new Texture(Gdx.files.internal("pipe.png"));
 		
-		pipes = new Pool<Pipes>(6, 20) {
+		pipes = new Pool<Pipes>(6, 10) {
 			@Override
 			protected Pipes newObject() {
 				return new Pipes(pipeImage);
@@ -58,26 +55,17 @@ public class GameScreen extends QScreenAdapter {
 		
 		currentPipes.add(pipes.obtain());
 		
-		camera = new OrthographicCamera();
-		camera.setToOrtho(false, QGame.WIDTH, QGame.HEIGHT);
-		
 		plane = new Plane(planeImage);
 	}
 
 	@Override
 	public void render(float delta) {
+		super.render(delta);
 		scrollTimer += delta;
 		float time = scrollTimer / 16;
 		if (time > 1.0f)
 			scrollTimer = 0.0f;
 		
-		Gdx.gl.glClearColor(1, 1, 1, 1);
-		Gdx.gl.glClear(GL10.GL_COLOR_BUFFER_BIT);
-
-		camera.update();
-
-		game.batch.setProjectionMatrix(camera.combined);
-
 		backgroundSprite.setU(time);
 		backgroundSprite.setU2(time + 1);
 		
@@ -90,8 +78,8 @@ public class GameScreen extends QScreenAdapter {
 			pipes.render(game.batch);
 		}
 		font.setColor(Color.BLACK);
-		font.setScale(2f,2f);
-		font.draw(game.batch, Integer.toString(score), (QGame.WIDTH / 2) - 20, QGame.HEIGHT - 20);
+		font.setScale(3f, 3f);
+		font.draw(game.batch, Integer.toString(score), (Gdx.graphics.getWidth() / 2) - 20, Gdx.graphics.getHeight() - 20);
 		game.batch.end();
 
 		if (TimeUtils.nanoTime() - lastPipeTime > PIPE_TIME) {
@@ -107,7 +95,7 @@ public class GameScreen extends QScreenAdapter {
 				pipesIterator.remove();
 				pipes.free(pipe);
 			}
-			if (pipe.hitPlane(plane)) {
+			if (pipe.hitPlane(plane) || plane.hitBottom()) {
 				// game over
 				game.setScreen(new MainMenuScreen(game));
 			}
