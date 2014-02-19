@@ -53,11 +53,11 @@ public class Pipes implements Poolable {
 	@Override
 	public void reset() {
 		// calculate height
-		final float height = (float) (Math.random() * 400) + 100;
+		final float height = (float) (Math.random() * (Gdx.graphics.getHeight() - 600)) + 100;
 		final float height2 = Gdx.graphics.getHeight() - HOLE - height;
 		
-		bottom.height = height;
-		top.height = height2;
+		top.height = height;
+		bottom.height = height2;
 		
 		top.width = WIDTH;
 		top.y = Gdx.graphics.getHeight() - top.height;
