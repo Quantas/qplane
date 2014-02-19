@@ -1,13 +1,11 @@
 package com.quantasnet.qgame.core.objects;
 
-import java.io.Serializable;
-
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
 
-public class Plane implements Serializable {
+public class Plane implements Renderable {
 
 	private static final long serialVersionUID = 2840611519158311121L;
 
@@ -40,6 +38,7 @@ public class Plane implements Serializable {
 		return hitBox.y < 0;
 	}
 
+	@Override
 	public void move(final float delta) {
 		final float speed = velocity * delta;
 
@@ -53,6 +52,7 @@ public class Plane implements Serializable {
 		}
 	}
 
+	@Override
 	public void render(final SpriteBatch spriteBatch) {
 		spriteBatch.draw(texture, textureBox.x, textureBox.y);
 	}

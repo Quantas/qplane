@@ -6,8 +6,9 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Pool.Poolable;
 
-public class Pipes implements Poolable {
-
+public class Pipes implements Renderable, Poolable {
+	private static final long serialVersionUID = -1589967695469956145L;
+	
 	private static final float WIDTH = 100f;
 	private static final float HOLE = 200f;
 	private static final float SPEED = 200f;
@@ -22,11 +23,13 @@ public class Pipes implements Poolable {
 		reset();
 	}
 	
+	@Override
 	public void move(final float deltaTime) {
 		top.x -= deltaTime * SPEED;
 		bottom.x -= deltaTime * SPEED;
 	}
 	
+	@Override
 	public void render(final SpriteBatch spriteBatch) {
 		spriteBatch.draw(texture, top.x, top.y, top.width, top.height);
 		spriteBatch.draw(texture, bottom.x, bottom.y, bottom.width, bottom.height);
