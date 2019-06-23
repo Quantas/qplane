@@ -1,33 +1,45 @@
 package com.quantasnet.qgame.core.screen;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Screen;
-import com.badlogic.gdx.graphics.GL10;
-import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.Texture.TextureWrap;
+import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.quantasnet.qgame.core.QGame;
 
-public class MainMenuScreen implements Screen {
-	final QGame game;
+public class MainMenuScreen extends QScreenAdapter {
+	private Texture background;
+	private Sprite backgroundSprite;
+	private float scrollTimer = 0.0f;
 
-	OrthographicCamera camera;
-
-	public MainMenuScreen(final QGame gam) {
-		game = gam;
-		camera = new OrthographicCamera();
-		camera.setToOrtho(false, QGame.WIDTH, QGame.HEIGHT);
+	public MainMenuScreen(final QGame game) {
+		super(game);
+		
+		background = new Texture(Gdx.files.internal("background2.png"));
+		background.setWrap(TextureWrap.Repeat, TextureWrap.Repeat);
+		backgroundSprite = new Sprite(background, 0, 0, (int) QGame.WIDTH, (int) QGame.HEIGHT);
+		backgroundSprite.setSize(Gdx.graphics.getWidth() * 8, Gdx.graphics.getHeight());
 	}
 
 	@Override
 	public void render(float delta) {
-		Gdx.gl.glClearColor(0, 0, 0.2f, 1);
-		Gdx.gl.glClear(GL10.GL_COLOR_BUFFER_BIT);
+		super.render(delta);
+		
+		scrollTimer += delta;
+		float time = scrollTimer / 16;
+		if (time > 1.0f)
+			scrollTimer = 0.0f;
 
-		camera.update();
-		game.batch.setProjectionMatrix(camera.combined);
+		backgroundSprite.setU(time);
+		backgroundSprite.setU2(time + 1);
 
+		game.font.setColor(Color.BLACK);
+		
 		game.batch.begin();
-		game.font.draw(game.batch, "Welcome to QGame! ", 100, 150);
-		game.font.draw(game.batch, "Touch to Start!", 100, 100);
+		backgroundSprite.draw(game.batch);
+		game.font.setScale(1f);
+		game.font.draw(game.batch, "QGame", (Gdx.graphics.getWidth() / 2) - 70, Gdx.graphics.getHeight() / 2);
+		game.font.draw(game.batch, "Touch to Start", (Gdx.graphics.getWidth() / 2) - 70, Gdx.graphics.getHeight() / 2 - 50);
 		game.batch.end();
 
 		if (Gdx.input.isTouched()) {
@@ -35,28 +47,9 @@ public class MainMenuScreen implements Screen {
 			dispose();
 		}
 	}
-
-	@Override
-	public void resize(int width, int height) {
-	}
-
-	@Override
-	public void show() {
-	}
-
-	@Override
-	public void hide() {
-	}
-
-	@Override
-	public void pause() {
-	}
-
-	@Override
-	public void resume() {
-	}
-
+	
 	@Override
 	public void dispose() {
+		background.dispose();
 	}
 }
